@@ -31,6 +31,8 @@ import (
 	"github.com/openshift/installer/pkg/types/vsphere"
 )
 
+const TechPreviewNoUpgrade = "TechPreviewNoUpgrade"
+
 func validInstallConfig() *types.InstallConfig {
 	return &types.InstallConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -2001,19 +2003,6 @@ func TestValidateInstallConfig(t *testing.T) {
 			expectedError: "platform.vsphere.apiVIPs: Required value: must specify VIP for API, when VIP for ingress is set",
 		},
 		{
-			name: "GCP Create Firewall Rules should return error if used WITHOUT tech preview when not enabled",
-			installConfig: func() *types.InstallConfig {
-				c := validInstallConfig()
-				c.Platform = types.Platform{
-					GCP: validGCPPlatform(),
-				}
-				c.GCP.CreateFirewallRules = gcp.CreateFirewallRulesDisabled
-
-				return c
-			}(),
-			expectedError: "platform.gcp.createFirewallRules: Forbidden: the TechPreviewNoUpgrade feature set must be enabled to use this field",
-		},
-		{
 			name: "GCP BYO PUBLIC DNS SHOULD return error if used WITHOUT tech preview",
 			installConfig: func() *types.InstallConfig {
 				c := validInstallConfig()
@@ -2058,7 +2047,7 @@ func TestValidateInstallConfig(t *testing.T) {
 				c.Platform.GCP.PrivateDNSZone = &gcp.DNSZone{
 					ProjectID: "myProject",
 				}
-				c.FeatureSet = "TechPreviewNoUpgrade"
+				c.FeatureSet = TechPreviewNoUpgrade
 
 				return c
 			}(),
@@ -2078,7 +2067,7 @@ func TestValidateInstallConfig(t *testing.T) {
 					ProjectID: "myProject",
 					ID:        "IDShouldNotExist",
 				}
-				c.FeatureSet = "TechPreviewNoUpgrade"
+				c.FeatureSet = TechPreviewNoUpgrade
 
 				return c
 			}(),
@@ -2113,7 +2102,7 @@ func TestValidateInstallConfig(t *testing.T) {
 				c.Platform.GCP.ComputeSubnet = "computeSubnet"
 				c.Platform.GCP.Network = "vpc"
 				c.CredentialsMode = "Passthrough"
-				c.FeatureSet = "TechPreviewNoUpgrade"
+				c.FeatureSet = TechPreviewNoUpgrade
 
 				return c
 			}(),

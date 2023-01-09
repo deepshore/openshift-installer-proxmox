@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/openshift/installer/pkg/asset/cluster"
+	openstackasset "github.com/openshift/installer/pkg/asset/cluster/openstack"
 	osp "github.com/openshift/installer/pkg/destroy/openstack"
 	"github.com/openshift/installer/pkg/terraform"
 	platformstages "github.com/openshift/installer/pkg/terraform/stages/platform"
@@ -30,6 +31,10 @@ func Destroy(dir string) (err error) {
 	}
 
 	if platform == openstack.Name {
+		if err := openstackasset.PreTerraform(); err != nil {
+			return errors.Wrapf(err, "Failed to  initialize infrastructure")
+		}
+
 		imageName := metadata.InfraID + "-ignition"
 		if err := osp.DeleteGlanceImage(imageName, metadata.OpenStack.Cloud); err != nil {
 			return errors.Wrapf(err, "Failed to delete glance image %s", imageName)
@@ -119,5 +124,5 @@ func copy(from string, to string) error {
 		return err
 	}
 
-	return os.WriteFile(to, data, 0666)
+	return os.WriteFile(to, data, 0o666) //nolint:gosec // state file doesn't need to be 0600
 }
